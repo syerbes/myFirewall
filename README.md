@@ -36,16 +36,16 @@ There are two main dependencies to be installed:
 Usage
 -----
 
-    :~$ python3 myFirewall.py -all ACCEPT|DROP [-in|-out]
-    :~$ python3 myFirewall.py -d RuleNumber [-in|-out]
-    :~$ python3 myFirewall.py -l
-    :~$ python3 myFirewall.py -r
-    :~$ python3 myFirewall.py -rule RuleName
-    :~$ python3 myFirewall.py [OPTIONS]
+    :~$ sudo python3 myFirewall.py -all ACCEPT|DROP [-in|-out]
+    :~$ sudo python3 myFirewall.py -d RuleNumber [-in|-out]
+    :~$ sudo python3 myFirewall.py -l
+    :~$ sudo python3 myFirewall.py -r
+    :~$ sudo python3 myFirewall.py -rule RuleName
+    :~$ sudo python3 myFirewall.py [OPTIONS]
     
-    Example:	python3 myFirewall.py -rule BlockIncomingSSH
-    		python3 myFirewall.py -proto tcp -portdst 4678 -out -t ACCEPT
-    		python3 myFirewall.py -proto tcp -ipsrc 45.32.2.1-45.34.0.0 -ipdst 122.123.22.1 -pos 1 -t DROP
+    Example:	sudo python3 myFirewall.py -rule BlockIncomingSSH
+    		sudo python3 myFirewall.py -proto tcp -portdst 4678 -out -t ACCEPT
+    		sudo python3 myFirewall.py -proto tcp -ipsrc 45.32.2.1-45.34.0.0 -ipdst 122.123.22.1 -pos 1 -t DROP
     
      Commands:
       -all  ACCEPT|DROP	Accept or block all packets. The option -in|-out specifies incoming of outgoing traffic. By default, it includes both
