@@ -2,6 +2,9 @@ import sys, iptc, re, socket
 
 single_options = False
 
+predesigned_rules = ['BlockIncomingSSH', 'BlockOutgoingSSH', 'BlockAllSSH', 'BlockIncomingHTTP', 'BlockIncomingHTTPS',\
+    'BlockIncomingPing', 'BlockInvalidPackets', 'BlockSYNFlooding', 'BlockXMASAttack', 'ForceSYNPackets'] 
+
 accepted_protocols = ['ah','egp','esp','gre','icmp','idp','igmp','ip','pim','pum','pup','raw','rsvp','sctp','tcp','tp','udp']
 ipsrc = None
 ipsrc_range = None
@@ -20,6 +23,133 @@ direction = None
 
 checker = False
 
+############################### List of Predefined Rules #############################
+
+
+def block_incoming_ssh():
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    rule = iptc.Rule()
+    rule.protocol = "tcp"
+    match = rule.create_match("tcp")
+    match.dport = "22"
+    match = rule.create_match("state")
+    match.state = "NEW"
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain.insert_rule(rule)
+    print("Successfully Created")
+
+def block_outgoing_ssh():
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "OUTPUT")
+    rule = iptc.Rule()
+    rule.protocol = "tcp"
+    match = rule.create_match("tcp")
+    match.dport = "22"
+    match = rule.create_match("state")
+    match.state = "NEW"
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain.insert_rule(rule)
+    print("Successfully Created")
+
+def block_all_ssh():
+    chain1 = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    chain2 = iptc.Chain(iptc.Table(iptc.Table.FILTER), "OUTPUT")
+    rule = iptc.Rule()
+    rule.protocol = "tcp"
+    match = rule.create_match("tcp")
+    match.dport = "22"
+    match = rule.create_match("state")
+    match.state = "NEW"
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain1.insert_rule(rule)
+    chain2.insert_rule(rule)
+    print("Successfully Created")
+
+def block_incoming_http():
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    rule = iptc.Rule()
+    rule.protocol = "tcp"
+    match = rule.create_match("tcp")
+    match.dport = "80"
+    match = rule.create_match("state")
+    match.state = "NEW"
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain.insert_rule(rule)
+    print("Successfully Created")
+
+def block_incoming_https():
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    rule = iptc.Rule()
+    rule.protocol = "tcp"
+    match = rule.create_match("tcp")
+    match.dport = "443"
+    match = rule.create_match("state")
+    match.state = "NEW"
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain.insert_rule(rule)
+    print("Successfully Created")
+
+def block_incoming_ping():
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    rule = iptc.Rule()
+    rule.protocol = "icmp"
+    match = rule.create_match("icmp")
+    match.icmp_type = "echo-reply"
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain.insert_rule(rule)
+    print("Successfully Created")
+
+def block_invalid_packets():
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    rule = iptc.Rule()
+    match = rule.create_match("state")
+    match.state = "iNVALID"
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain.insert_rule(rule)
+    print("Successfully Created")
+
+def syn_flooding():
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    rule = iptc.Rule()
+    rule.protocol = "tcp"
+    match = rule.create_match("tcp")
+    match.tcp_flags = [ 'FIN,SYN,RST,ACK', 'SYN' ]
+    match = rule.create_match("limit")
+    match.limit = "10/second"
+    target = iptc.Target(rule, "ACCEPT")
+    rule.target = target
+    chain.insert_rule(rule)
+    print("Successfully Created")
+
+def block_xmas_attack():
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    rule = iptc.Rule()
+    rule.protocol = "tcp"
+    match = rule.create_match("tcp")
+    match.tcp_flags = [ 'ALL', 'ALL' ]
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain.insert_rule(rule)
+    print("Successfully Created")
+
+def force_syn_packets():
+    chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
+    rule = iptc.Rule()
+    rule.protocol = "tcp"
+    match = rule.create_match("tcp")
+    match.syn = "!1"
+    match = rule.create_match("state")
+    match.state = "NEW"
+    target = iptc.Target(rule, "DROP")
+    rule.target = target
+    chain.insert_rule(rule)
+    print("Successfully Created")
 
 # Function to delete rules
 
@@ -91,6 +221,8 @@ for index, value in enumerate(sys.argv):
                 sport = None
                 ip_src_range = None
                 ip_dst_range = None
+                match_state = None
+                match_tcp_flags = None
                 for match in rule.matches:
                     if (match.dport != None):
                         dport = match.dport
@@ -100,6 +232,10 @@ for index, value in enumerate(sys.argv):
                         ip_src_range = match.src_range
                     if (match.dst_range != None):
                         ip_dst_range = match.dst_range
+                    if (match.state != None):
+                        match_state = match.state
+                    if (match.tcp_flags != None):
+                        match_tcp_flags = match.tcp_flags[match.tcp_flags.find(' ')+1:]
                 if(ip_src_range != None):
                     source_ip = ip_src_range
                 else:
@@ -111,7 +247,8 @@ for index, value in enumerate(sys.argv):
                 print ("==========================================")
                 print ("RULE("+ rule_type+")", index, "||", "proto:", rule.protocol + " ||", "sport:", str(sport) + " ||",
                  "dport:", str(dport) + " ||", "src:", source_ip + " ||", "dst:", destination_ip + " ||\n", "|| inInt:",
-                 str(rule.in_interface) + " ||", "outInt:", str(rule.out_interface) + " ||","Target:", rule.target.name)
+                 str(rule.in_interface) + " ||", "outInt:", str(rule.out_interface) + " ||",
+                 "tcpflags:", str(match_tcp_flags) + " ||", "state:", str(match_state) + " ||", "Target:", rule.target.name)
                 print ("==========================================")
 
     elif(value == '-r'):
@@ -161,6 +298,42 @@ for index, value in enumerate(sys.argv):
             chain2 = iptc.Chain(iptc.Table(iptc.Table.FILTER), "OUTPUT")
             chain1.insert_rule(rule)
             chain2.insert_rule(rule)
+
+    elif(value == '-rule'):
+        single_options = True
+        if (len(sys.argv)) != 3:
+            if (len(sys.argv) == 2):
+                print("The list of rules available is:\n")
+                for i in predesigned_rules:
+                    print(i)
+            else:
+                sys.exit("The option -r does not accept additional options. Please, type: -rule RULE")
+        elif(sys.argv[index+1] == 'BlockIncomingSSH'):
+            block_incoming_ssh()
+        elif(sys.argv[index+1] == 'BlockOutgoingSSH'):
+            block_outgoing_ssh()
+        elif(sys.argv[index+1] == 'BlockAllSSH'):
+            block_all_ssh()
+        elif(sys.argv[index+1] == 'BlockIncomingHTTP'):
+            block_incoming_http()
+        elif(sys.argv[index+1] == 'BlockIncomingHTTPS'):
+            block_incoming_https()
+        elif(sys.argv[index+1] == 'BlockIncomingPing'):
+            block_incoming_ping()
+        elif(sys.argv[index+1] == 'BlockInvalidPackets'):
+            block_invalid_packets()
+        elif(sys.argv[index+1] == 'BlockSYNFlooding'):
+            syn_flooding()
+        elif(sys.argv[index+1] == 'BlockXMASAttack'):
+            block_xmas_attack()
+        elif(sys.argv[index+1] == 'ForceSYNPackets'):
+            force_syn_packets()
+        else:
+            print("Rule not available. The list of available rules is:\n")   
+            for i in predesigned_rules:
+                print(i) 
+            print("")                     
+    
 
 
 if(not single_options):
@@ -355,22 +528,22 @@ if(not single_options):
         try:
             chain1.insert_rule(rule, position=int(custom_position))
         except:
-            sys.exit("Index of insertion out of boundaries for Input table")
+            sys.exit("Index of insertion out of boundaries for existing Input table. Please, choose a value between 0 and (Max.AmountOfRules-1)")
         try:
             chain2.insert_rule(rule, position=int(custom_position))
         except:
-            sys.exit("Index of insertion out of boundaries for Output table")
+            sys.exit("Index of insertion out of boundaries for Output table. Please, choose a value between 0 and (Max.AmountOfRules-1)")
 
     elif(direction == "incoming"):
         chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
         try:
             chain.insert_rule(rule, position=int(custom_position))
         except:
-            sys.exit("Index of insertion out of boundaries")
+            sys.exit("Index of insertion out of boundaries.  Please, choose a value between 0 and (Max.AmountOfRules-1)")
 
     elif(direction == "outgoing"):
         chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "OUTPUT")
         try:
             chain.insert_rule(rule, position=int(custom_position))
         except:
-            sys.exit("Index of insertion out of boundaries")
+            sys.exit("Index of insertion out of boundaries. Please, choose a value between 0 and (Max.AmountOfRules-1)")
