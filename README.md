@@ -16,7 +16,7 @@ being included into the system.
 Based on the Iptables native linux firewall, it contributes with the following additional features:
 	
 	- Easier to use. More user friendly for beginners. It incorporates the most important features to configure rules.
-	- Predefined rules to defend the ystem against known attacks and potential breaches.
+	- Predefined rules to defend the system against known attacks and potential breaches.
 	- Strict input validation with clear explanations in case of wrong inputs.
 
 
@@ -36,7 +36,7 @@ There are two main dependencies to be installed:
 Usage
 -----
 
-    :~$ python3 myFirewall.py -all ACCEPT|BLOCK [-in|-out]
+    :~$ python3 myFirewall.py -all ACCEPT|DROP [-in|-out]
     :~$ python3 myFirewall.py -d RuleNumber [-in|-out]
     :~$ python3 myFirewall.py -l
     :~$ python3 myFirewall.py -r
@@ -48,7 +48,7 @@ Usage
     		python3 myFirewall.py -proto tcp -ipsrc 45.32.2.1-45.34.0.0 -ipdst 122.123.22.1 -pos 1 -t DROP
     
      Commands:
-      -all    ACCEPT|BLOCK	Accept or block all packets. The option -in|-out specifies incoming of outgoing traffic. By default, it includes both
+      -all  ACCEPT|DROP	Accept or block all packets. The option -in|-out specifies incoming of outgoing traffic. By default, it includes both
       -d	RuleNumber	Delete the rule given an ID number. The ID is shown in option -l. By default, it deletes the rule from both incoming and outgoing.
       -l			List all the rules.
       -r			Delete all rules in the system.
@@ -74,11 +74,11 @@ Usage
       -ipdst,			Ip Destination. It can be a single value or a range: xxx.xxx.xxx.xxx OR xxx.xxx.xxx.xxx-xxx.xxx.xxx.xxx
       -portsrc,			Source port. It can be a single value or a range: x OR x:x
       -portdst,			Destination port. It can be a single value or a range: x OR x:x
-      -pos,			Position to store the rule. Positions are important in terms of priority. If not icluded, the default position is the first (0).
+      -pos,				Position to store the rule. Positions are important in terms of priority. If not icluded, the default position is the first (0).
       -proto,			Protocol. It can be: 'ah','egp','esp','gre','icmp','idp','igmp','ip','pim','pum','pup','raw','rsvp','sctp','tcp','tp','udp'.
       -intin,			Interface for incoming traffic.
       -intout,			Interface for outgoing traffic.
-      -t				Target. It can be ACCEPT or BLOCK. Always needed when creating a rule.
+      -t				Target. It can be ACCEPT or DROP. Always needed when creating a rule.
 
   
 
